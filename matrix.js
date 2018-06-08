@@ -1,5 +1,9 @@
+/* Автор - Скороход Алеся */
+
 var T1 = 0;
 var Tn = 0;
+var sumNum = 0;
+var Lavg = 0;
 var modTime = document.getElementById("modTime").value;
 var sumTime = document.getElementById("sumTime").value;
 var subTime = document.getElementById("subTime").value; 
@@ -28,12 +32,6 @@ function matrixGen(x, y){
     return array;
 }
 
-function getT1(time, row, col){
-   
-    T1 += time * row * col;
-    Tn += Math.ceil((time * row * col)/procEl);
-}
-
 function getMod(array, size1, size2, procEl, modTime){
 
     var arrayMod = new Array(size1);
@@ -44,6 +42,7 @@ function getMod(array, size1, size2, procEl, modTime){
     for (var i = 0; i < size1; i++){
         for (var j = 0; j < size2; j++){
             arrayMod[i][j] = Math.abs(array[i][j]);
+            Lavg += 1;
         }
     }
     T1 += parseInt(modTime * size1 * size2);
@@ -59,6 +58,7 @@ function mult(a,b, procEl, multTime){
     console.log(T1);
     T1 += parseInt(multTime * 1);
     Tn += Math.ceil((multTime * 1)/procEl);
+    Lavg += 2;
     return (a*b).toFixed(3);
 }
 
@@ -66,6 +66,7 @@ function toPow(a, pow1, procEl, sqTime){
     console.log(T1);
     T1 += parseInt(sqTime * 1);
     Tn += Math.ceil((sqTime * 1)/procEl);
+    Lavg += 2;
     return Math.pow(a, pow1).toFixed(3);
 }
 
@@ -73,12 +74,14 @@ function sub(a,b, procEl, subTime){
     console.log(T1);
     T1 += parseInt(subTime * 1);
     Tn += Math.ceil((subTime * 1)/procEl);
+    Lavg += 2;
     return (a-b).toFixed(3);
 }
 function sum1(a,b, procEl, sumTime){
     console.log(T1);
     T1 += parseInt(sumTime * 1);
     Tn += Math.ceil((sumTime * 1)/procEl);
+    Lavg += 2;
     return (a+b).toFixed(3);
 }
 function getD(A, B, p, m , q, procEl, modTime, sumTime, subTime, compTime, sqTime, multTime){
@@ -96,18 +99,21 @@ function getD(A, B, p, m , q, procEl, modTime, sumTime, subTime, compTime, sqTim
                     D[k][i][j] = mult(A[i][k], B[k][j], procEl, multTime);
                     T1 += parseInt(compTime * 1);
                     Tn += Math.ceil((compTime * 1)/procEl);
+                    Lavg += 2;
                 }
                 else if (B[k][j] == 0){
                     D[k][i].push([]);
                     D[k][i][j] = sum1(toPow(A[i][k], 2, procEl, sqTime), B[k][j], procEl, sumTime);
                     T1 += parseInt(compTime * 1);
                     Tn += Math.ceil((compTime * 1)/procEl);
+                    Lavg += 2;
                 }
                 else{
                     D[k][i].push([]);
                     D[k][i][j] = sub(toPow(A[i][k], 2, procEl, subTime), Math.abs(mult(A[i][k], B[k][j], procEl, multTime)), procEl, subTime);
                     T1 += parseInt(modTime * 1);
                     Tn += Math.ceil((modTime * 1)/procEl);
+                    Lavg += 1;
                 }
             }
         }
@@ -117,18 +123,17 @@ function getD(A, B, p, m , q, procEl, modTime, sumTime, subTime, compTime, sqTim
 
 function sum(kArray, procEl, sumTime){
     var C = [];
-    if (kArray.length != 1) 
+    if (kArray.length > 1) 
     {    
         if (kArray.length > 2 * procEl)
         {
             for (var i = 0; i < 2 * procEl; i += 2)
             {
-                var firstSummand = parseFloat(kArray[i]);
-                var secondSummand = parseFloat(kArray[i + 1]);
-                var tempRes = (firstSummand + secondSummand).toFixed(3);
-                C.push(tempRes);
+                var temp = ( parseFloat(kArray[i]) + parseFloat(kArray[i + 1])).toFixed(3);
+                C.push(temp);
                 T1 += parseInt(sumTime * 1);
-                Tn += Math.ceil((sumTime * 1)/procEl);          
+                Tn += Math.ceil((sumTime * 1)/procEl);      
+                Lavg += 2;    
             }
             for (var i = 2 * procEl; i < kArray.length; i++){
                 C.push(kArray[i]);
@@ -137,7 +142,7 @@ function sum(kArray, procEl, sumTime){
         
         else
         {
-            var ost = kArray.length % 2;    
+            var ost = kArray.length % 2; 
             if (ost == 1)
             {
                 C.push(kArray[kArray.length - 1]);
@@ -145,12 +150,11 @@ function sum(kArray, procEl, sumTime){
         
             for (var i = 0; i < (kArray.length - ost); i += 2)
             {
-                var firstSummand = parseFloat(kArray[i]);
-                var secondSummand = parseFloat(kArray[i + 1]);
-                var tempRes = (firstSummand + secondSummand).toFixed(3);
-                C.push(tempRes);
+                var temp = (parseFloat(kArray[i]) + parseFloat(kArray[i + 1])).toFixed(3);
+                C.push(temp);
                 T1 += parseInt(sumTime * 1);
-                Tn += Math.ceil((sumTime * 1)/procEl);           
+                Tn += Math.ceil((sumTime * 1)/procEl); 
+                Lavg += 2;          
             }               
         }
         return sum(C, procEl, sumTime);
@@ -166,10 +170,10 @@ function sum(kArray, procEl, sumTime){
 function getC( p, q, m, D, procEl,sumTime){
     var C = matrixGen(p, q);
 
-    for (var i; i < p; i++){
+    for (var i = 0; i < p; i++){
         for (var j = 0; j < q; j++){
             var kArray = [];
-            for (var k = 0; k < D.length(); k++){
+            for (var k = 0; k < D.length; k++){
                 kArray.push(parseFloat(D[k][i][j]));
             }
             C[i][j] = sum(kArray, procEl, sumTime);
@@ -325,8 +329,11 @@ function main(){
     console.log(T1);
     var Ky = (T1/Tn).toFixed(3);
     var e = (Ky/procEl).toFixed(3);
-    document.getElementById( 1 +"."+ 5).innerHTML += "<p> T1 = "+T1+"</p><p> Tn = "+Tn+"</p><p> Ky = "+Ky+"</p><p> e = "+e+"</p>";
+    var D = (Tn/(Lavg + q)).toFixed(3);
+    document.getElementById( 1 +"."+ 5).innerHTML += "<p> T1 = "+T1+"</p><p> Tn = "+Tn+"</p><p> Ky = "+Ky+"</p><p> e = "+e+"</p><p> D = "+D+"</p>";
     T1 = 0;
     Tn = 0;
+    sumNum = 0;
+    Lavg = 0;
        
 }
